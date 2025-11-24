@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>WDBak 配置工具</title>
+  <link rel="icon" href="../icon.ico">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1 class="ttl">WDBak配置</h1>
+      <p class="tip">
+        模板文件默认是运行目录下的 <code>WDBak.bak</code>，
+      </p>
+
+      <form id="cfg_form">
+        <div class="row">
+          <label class="lab" for="exe">模板文件（.bak）</label>
+          <input id="exe" class="inp" type="text"
+                 placeholder="默认：WDBak.bak">
+        </div>
+
+        <div class="row">
+          <label class="lab" for="url">服务器地址</label>
+          <input id="url" class="inp" type="text"
+                 placeholder="例如：https://webdav.123pan.cn/webdav">
+        </div>
+
+        <div class="row row2">
+          <div class="col">
+            <label class="lab" for="user">用户名</label>
+            <input id="user" class="inp" type="text">
+          </div>
+          <div class="col">
+            <label class="lab" for="pass">密码</label>
+            <input id="pass" class="inp" type="password">
+          </div>
+        </div>
+
+        <div class="row row2">
+          <div class="col">
+            <label class="lab" for="root">云端目录</label>
+            <input id="root" class="inp" type="text" placeholder="例如：bak">
+          </div>
+          <div class="col">
+            <label class="lab" for="mode">模式</label>
+            <select id="mode" class="inp">
+              <option value="skip">跳过(skip)</option>
+              <option value="over">覆盖(over)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row row2">
+          <div class="col">
+            <label class="lab" for="typ">协议</label>
+            <select id="typ" class="inp">
+              <option value="dav">WebDAV</option>
+              <option value="ftp">FTP</option>
+              <option value="smb">SMB</option>
+            </select>
+          </div>
+          <div class="col">
+            <label class="lab" for="thr">并发线程数</label>
+            <input id="thr" class="inp" type="number" min="1" max="64" value="4">
+          </div>
+        </div>
+
+        <div class="row">
+          <label class="lab" for="list">备份路径（每行一个文件或文件夹）</label>
+          <textarea id="list" class="txt" rows="5"
+            placeholder="例如：&#10;C:/Desktop&#10;D:/data"></textarea>
+        </div>
+
+        <div class="row btns">
+          <button id="btn_save" class="btn btn-main" type="submit">生成文件</button>
+          <button id="btn_clr" class="btn btn-ghost" type="button">生成无配置文件</button>
+          <button id="btn_reset" class="btn btn-ghost" type="button">重置</button>
+          <span id="msg" class="msg"></span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
