@@ -57,88 +57,104 @@ func (d *DavSto) Mk(ctx context.Context, dir string) error {
 		return nil
 	}
 	u := mkURL(d.url, dir)
-	req, err := http.NewRequestWithContext(ctx, "MKCOL", u, nil)
-	if err != nil {
-		return err
-	}
-	if d.usr != "" {
-		req.SetBasicAuth(d.usr, d.pas)
-	}
-	resp, err := d.cli.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode == 405 || resp.StatusCode == 301 || resp.StatusCode == 302 {
+
+	return doTry(ctx, 3, func() error {
+		req, err := http.NewRequestWithContext(ctx, "MKCOL", u, nil)
+		if err != nil {
+			return err
+		}
+		if d.usr != "" {
+			req.SetBasicAuth(d.usr, d.pas)
+		}
+		resp, err := d.cli.Do(req)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode == 405 || resp.StatusCode == 301 ||
+			resp.StatusCode == 302 || resp.StatusCode == 307 ||
+			resp.StatusCode == 308 {
+			return nil
+		}
+		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+			return fmt.Errorf("mkcol %s: %s", u, resp.Status)
+		}
 		return nil
-	}
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("mkcol %s: %s", u, resp.Status)
-	}
-	return nil
+	})
 }
 
 func (d *DavSto) Has(ctx context.Context, rem string) (bool, error) {
 	u := mkURL(d.url, rem)
-	req, err := http.NewRequestWithContext(ctx, http.MethodHead, u, nil)
-	if err != nil {
-		return false, err
-	}
-	if d.usr != "" {
-		req.SetBasicAuth(d.usr, d.pas)
-	}
-	resp, err := d.cli.Do(req)
-	if err != nil {
-		return false, err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode == 404 || resp.StatusCode == 410 {
-		return false, nil
-	}
-	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-		return true, nil
-	}
-	return false, fmt.Errorf("head %s: %s", u, resp.Status)
+
+	var ok bool
+	err := doTry(ctx, 3, func() error {
+		req, err := http.NewRequestWithContext(ctx, http.MethodHead, u, nil)
+		if err != nil {
+			return err
+		}
+		if d.usr != "" {
+			req.SetBasicAuth(d.usr, d.pas)
+		}
+		resp, err := d.cli.Do(req)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode == 404 || resp.StatusCode == 410 {
+			ok = false
+			return nil
+		}
+		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+			ok = true
+			return nil
+		}
+		return fmt.Errorf("head %s: %s", u, resp.Status)
+	})
+	return ok, err
 }
 
 func (d *DavSto) Put(ctx context.Context, loc, rem string, sz int64) error {
-	f, err := os.Open(loc)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
 	u := mkURL(d.url, rem)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPut, u, f)
-	if err != nil {
-		return err
-	}
-	if d.usr != "" {
-		req.SetBasicAuth(d.usr, d.pas)
-	}
-	req.ContentLength = sz
 
-	t0 := time.Now()
-	resp, err := d.cli.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	_, _ = io.Copy(io.Discard, resp.Body)
+	return doTry(ctx, 3, func() error {
+		f, err := os.Open(loc)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
 
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("put %s: %s", u, resp.Status)
-	}
+		req, err := http.NewRequestWithContext(ctx, http.MethodPut, u, f)
+		if err != nil {
+			return err
+		}
+		if d.usr != "" {
+			req.SetBasicAuth(d.usr, d.pas)
+		}
+		req.ContentLength = sz
 
-	dur := time.Since(t0).Seconds()
-	if dur <= 0 {
-		dur = 0.001
-	}
-	mb := float64(sz) / 1024.0 / 1024.0
-	spd := mb / dur
-	log.Printf("[OK ] %s -> %s (%.2f MB, %.1fs, %.2f MB/s)\n",
-		loc, u, mb, dur, spd)
-	return nil
+		t0 := time.Now()
+		resp, err := d.cli.Do(req)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+		_, _ = io.Copy(io.Discard, resp.Body)
+
+		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+			return fmt.Errorf("put %s: %s", u, resp.Status)
+		}
+
+		dur := time.Since(t0).Seconds()
+		if dur <= 0 {
+			dur = 0.001
+		}
+		mb := float64(sz) / 1024.0 / 1024.0
+		spd := mb / dur
+		log.Printf("[OK ] %s -> %s (%.2f MB, %.1fs, %.2f MB/s)\n",
+			loc, u, mb, dur, spd)
+		return nil
+	})
 }
 
 func mkURL(base, rp string) string {
