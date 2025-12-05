@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -116,7 +115,7 @@ func (d *DavSto) Has(ctx context.Context, rem string) (bool, error) {
 
 func (d *DavSto) Put(ctx context.Context, loc, rem string, sz int64) error {
 	u := mkURL(d.url, rem)
-
+	dbgLogf("[DBG] PUT %s -> %s (%d bytes)", loc, u, sz)
 	return doTry(ctx, 3, func() error {
 		f, err := os.Open(loc)
 		if err != nil {
@@ -151,7 +150,7 @@ func (d *DavSto) Put(ctx context.Context, loc, rem string, sz int64) error {
 		}
 		mb := float64(sz) / 1024.0 / 1024.0
 		spd := mb / dur
-		log.Printf("[OK ] %s -> %s (%.2f MB, %.1fs, %.2f MB/s)\n",
+		dbgLogf("[OK ] %s -> %s (%.2f MB, %.1fs, %.2f MB/s)\n",
 			loc, u, mb, dur, spd)
 		return nil
 	})

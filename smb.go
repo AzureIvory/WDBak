@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"net/url"
 	"os"
@@ -111,6 +110,7 @@ func (s *SmbSto) Has(ctx context.Context, rem string) (bool, error) {
 
 func (s *SmbSto) Put(ctx context.Context, loc, rem string, sz int64) error {
 	p := s.full(rem)
+	dbgLogf("[DBG] PUT %s -> smb:%s (%d bytes)", loc, p, sz)
 	return doTry(ctx, 3, func() error {
 		in, err := os.Open(loc)
 		if err != nil {
@@ -136,7 +136,7 @@ func (s *SmbSto) Put(ctx context.Context, loc, rem string, sz int64) error {
 		}
 		mb := float64(n) / 1024.0 / 1024.0
 		spd := mb / dur
-		log.Printf("[OK ] %s -> smb:%s (%.2f MB, %.1fs, %.2f MB/s)\n",
+		dbgLogf("[OK ] %s -> smb:%s (%.2f MB, %.1fs, %.2f MB/s)\n",
 			loc, p, mb, dur, spd)
 		return nil
 	})

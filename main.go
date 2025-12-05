@@ -58,6 +58,8 @@ func run(ctx context.Context) error {
 		return err
 	}
 
+	setDbg(cfg.Debug)
+
 	if cfg.Thr <= 0 {
 		cfg.Thr = runtime.NumCPU()
 		if cfg.Thr < 1 {

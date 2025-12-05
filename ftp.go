@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/url"
 	"os"
 	"path"
@@ -95,6 +94,7 @@ func (f *FtpSto) Has(ctx context.Context, rem string) (bool, error) {
 
 func (f *FtpSto) Put(ctx context.Context, loc, rem string, sz int64) error {
 	p := f.full(rem)
+	dbgLogf("[DBG] PUT %s -> ftp:%s (%d bytes)", loc, p, sz)
 	return doTry(ctx, 3, func() error {
 		fh, err := os.Open(loc)
 		if err != nil {
@@ -112,7 +112,7 @@ func (f *FtpSto) Put(ctx context.Context, loc, rem string, sz int64) error {
 		}
 		mb := float64(sz) / 1024.0 / 1024.0
 		spd := mb / dur
-		log.Printf("[OK ] %s -> ftp:%s (%.2f MB, %.1fs, %.2f MB/s)\n",
+		dbgLogf("[OK ] %s -> ftp:%s (%.2f MB, %.1fs, %.2f MB/s)\n",
 			loc, p, mb, dur, spd)
 		return nil
 	})

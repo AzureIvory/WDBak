@@ -10,14 +10,15 @@ import (
 )
 
 type Cfg struct {
-	Url  string   `json:"url"`
-	User string   `json:"user"`
-	Pass string   `json:"pass"`
-	Root string   `json:"root"`
-	Mode string   `json:"mode"`
-	Thr  int      `json:"thr"`
-	Typ  string   `json:"typ"`
-	List []string `json:"list"`
+	Url   string   `json:"url"`
+	User  string   `json:"user"`
+	Pass  string   `json:"pass"`
+	Root  string   `json:"root"`
+	Mode  string   `json:"mode"`
+	Thr   int      `json:"thr"`
+	Typ   string   `json:"typ"`
+	List  []string `json:"list"`
+	Debug bool     `json:"debug"`
 }
 
 const mag = "CFG_TAIL1"

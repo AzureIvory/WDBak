@@ -45,6 +45,7 @@
       thr: thr,
       typ: $("typ").value,
       list: lst,
+      debug: $("debug").checked,
     };
   }
 
@@ -114,6 +115,7 @@
     $("typ").value = "dav";
     $("thr").value = "4";
     $("list").value = "";
+    $("debug").checked = false;
     msgSet("", null);
     defFill();
   }
@@ -128,6 +130,7 @@
     $("mode").value = "skip";
     $("typ").value = "dav";
     $("thr").value = "4";
+    $("debug").checked = false;
 
     defFill();
   });

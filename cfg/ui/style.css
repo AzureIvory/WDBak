@@ -59,6 +59,18 @@ html, body {
   margin-bottom: 4px;
   color: #444;
 }
+.chk {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #444;
+}
+
+.chk input {
+  width: 16px;
+  height: 16px;
+}
 
 .inp,
 .txt,
